@@ -50,7 +50,7 @@ class zMQLogger():
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
     def sigINT_Handler(self, signal, frame):
-        print("\nZMQLogger: You pressed Ctrl+C")
+        print("\nZMQLogger detected SigINT signal")
         self.logger.save_line("Signal SigINT detected")
         for port in self.ports:
             self.subscriber.disconnect('tcp://127.0.0.1:'+port)
