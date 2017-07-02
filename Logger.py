@@ -12,8 +12,9 @@ class Logger():
 
     def save_line(self,data):
         time_s = time.time()
-        time_ms = int((time_s - int(time_s))*1000.0)
-        timestamp = time.strftime(('%H_%M_%S'), time.localtime(time_s))+"_" +str(time_ms) + " : "
+        time_ms = str(int((time_s - int(time_s))*1000.0)).zfill(3)
+        timestamp = (time.strftime(('%H_%M_%S'), time.localtime(time_s))
+                     +"_"+ time_ms +" : ")
         if(self.opened):
             data = data.replace("\r","").replace("\n","")
             self.logfile.write(timestamp+data+"\r\n")
