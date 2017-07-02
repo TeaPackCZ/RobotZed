@@ -15,6 +15,7 @@ class Logger():
         time_ms = int((time_s - int(time_s))*1000.0)
         timestamp = time.strftime(('%H_%M_%S'), time.localtime(time_s))+"_" +str(time_ms) + " : "
         if(self.opened):
+            data = data.replace("\r","").replace("\n","")
             self.logfile.write(timestamp+data+"\r\n")
             self.logfile.flush()
             return 0,""
