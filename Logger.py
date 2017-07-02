@@ -12,7 +12,7 @@ class Logger():
 
     def save_line(self,data):
         time_s = time.time()
-        time_ms = int(round((time_s - round(time_s))*1000))
+        time_ms = int((time_s - int(time_s))*1000.0)
         timestamp = time.strftime(('%H_%M_%S'), time.localtime(time_s))+"_" +str(time_ms) + " : "
         if(self.opened):
             self.logfile.write(timestamp+data)
