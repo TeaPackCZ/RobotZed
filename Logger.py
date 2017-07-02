@@ -29,4 +29,63 @@ class Logger():
             return 0
         else:
             return 1
-            
+
+import zmq
+import signal
+import sys
+from time import sleep
+
+class zMQLogger():
+    def __init__(self):
+        self.logger = Logger("zMQ_logger")
+        self.ports = ["10000"]
+        self.externalIPs = []
+        self.enabled = True
+        signal.signal(signal.SIGINT, self.sigINT_Handler)
+        zMQC = zmq.Context()
+        self.subscriber = zMQC.socket(zmq.SUB)
+        for port in self.ports:
+            self.subscriber.bind('tcp://127.0.0.1:'+port)
+            self.logger.save_line("Binded to port: " + port)
+        self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
+
+    def sigINT_Handler(self, signal, frame):
+        print("\nZMQLogger: You pressed Ctrl+C")
+        self.logger.save_line("Signal SigINT detected")
+        for port in self.ports:
+            self.subscriber.disconnect('tcp://127.0.0.1:'+port)
+            self.logger.save_line("Disconnected from local port: " + port)
+        for externalIP in self.externalIPs:
+            self.subscriber.disconnect('tcp://'+externalIP)
+            self.logger.save_line("Disconnected from IP: " + externalIP)
+        self.enabled = False
+        sys.exit(0)
+
+    def addLocalPort(self,newport):
+        if(self.enabled):
+            if(newport in self.ports):
+                self.logger.save_line("LocalPort " + newport + " is already binded...")
+            else:
+                self.ports.append(newport)
+                self.subscriber.bind('tcp://127.0.0.1:'+newport)
+                self.logger.save_line("Binded to new local port: " + newport)
+
+    def addIP(self, newIP):
+        if(self.enabled):
+            if(newIP in self.externalIPs):
+                self.logger.save_line("Adress:Port " + newIP + " is already binded...")
+            else:
+                try:
+                    self.subscriber.bind('tcp://'+newIP)
+                    self.logger.save_line("Binded to new adress:port: " + newIP)
+                    self.externalIPs.append(newIP)
+                except:
+                    self.logger.save_line("New adress can't be binded - IP "
+                                          + newIP + " not reachable")
+
+    def run(self):
+        while(self.enabled):
+            message = self.subscriber.recv_string()
+            self.logger.save_line(message)
+
+
