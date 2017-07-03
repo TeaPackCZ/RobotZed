@@ -105,13 +105,11 @@ class gpsReader():
  
     def connect_zmq(self):
         try:
-            self.publisher.connect('tcp://127.0.0.1:10000')
-            self.logger.save_line("Connected to logger port")
             self.publisher.connect('tcp://127.0.0.1:'+str(self.zmqPort))
             self.logger.save_line("Connected to local port: " + self.zmqPort)
             sleep(1)
-            self.publisher.send_string(self.zmqID + " connected on ports:"
-                                       + " 10000 and " + self.zmqPort )
+            self.publisher.send_string(self.zmqID + " connected on port "
+                                       + self.zmqPort)
 
             return True
         except:
