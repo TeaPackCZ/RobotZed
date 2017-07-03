@@ -47,8 +47,8 @@ class zMQLogger():
         zMQC = zmq.Context()
         self.subscriber = zMQC.socket(zmq.SUB)
         for port in self.ports:
-            self.subscriber.bind('tcp://127.0.0.1:'+port)
-            self.logger.save_line("Binded to port: " + port)
+            self.subscriber.connect('tcp://127.0.0.1:'+port)
+            self.logger.save_line("Connected to port: " + port)
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
     def sigINT_Handler(self, signal, frame):
@@ -69,20 +69,20 @@ class zMQLogger():
                 self.logger.save_line("LocalPort " + newport + " is already binded...")
             else:
                 self.ports.append(newport)
-                self.subscriber.bind('tcp://127.0.0.1:'+newport)
-                self.logger.save_line("Binded to new local port: " + newport)
+                self.subscriber.connect('tcp://127.0.0.1:'+newport)
+                self.logger.save_line("Connected to new local port: " + newport)
 
     def addIP(self, newIP):
         if(self.enabled):
             if(newIP in self.externalIPs):
-                self.logger.save_line("Adress:Port " + newIP + " is already binded...")
+                self.logger.save_line("Adress:Port " + newIP + " is already connected...")
             else:
                 try:
-                    self.subscriber.bind('tcp://'+newIP)
-                    self.logger.save_line("Binded to new adress:port: " + newIP)
+                    self.subscriber.connect('tcp://'+newIP)
+                    self.logger.save_line("Connected to new adress:port: " + newIP)
                     self.externalIPs.append(newIP)
                 except:
-                    self.logger.save_line("New adress can't be binded - IP "
+                    self.logger.save_line("New adress can't be connected - IP "
                                           + newIP + " not reachable")
 
     def run(self):

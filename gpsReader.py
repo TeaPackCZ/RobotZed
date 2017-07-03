@@ -105,15 +105,15 @@ class gpsReader():
  
     def connect_zmq(self):
         try:
-            self.publisher.connect('tcp://127.0.0.1:'+str(self.zmqPort))
-            self.logger.save_line("Connected to local port: " + self.zmqPort)
+            self.publisher.bind('tcp://127.0.0.1:'+str(self.zmqPort))
+            self.logger.save_line("Binded to local port: " + self.zmqPort)
             sleep(1)
-            self.publisher.send_string(self.zmqID + " connected on port "
+            self.publisher.send_string(self.zmqID + " binded on port "
                                        + self.zmqPort)
 
             return True
         except:
-            self.logger.save_line("Failed to connect to localPort "
+            self.logger.save_line("Failed to bind localPort "
                                   + self.zmqPort)
             return False
 
