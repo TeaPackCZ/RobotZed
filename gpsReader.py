@@ -183,15 +183,15 @@ class gpsReader():
         #   Status (A/V - Active/Void)
         try:
             data_split = line.split(",")
-            self.lat_ne = data_split[2]
-            self.lon_ws = data_split[4]
+            self.lat_ns = data_split[2]
+            self.lon_we = data_split[4]
             self.longitude = round(float(data_split[3])/100,7)
             self.latitude = round(float(data_split[1])/100,7)
             self.gps_time = data_split[5]
             return 0
         except:
-            self.lat_ne = " "
-            self.lon_ws = " "
+            self.lat_ns = " "
+            self.lon_we = " "
             self.longitude = -1.0
             self.latitude = -1.0
             self.gps_time = -1.0
@@ -206,8 +206,8 @@ class gpsReader():
     def sendZMQPosition(self):
         data = "ID:"+str(self.zmqID)
         data+= ";TIME:"+str(self.gps_time)
-        data+= ";LON:"+str(self.longitude)+","+self.lon_ws
-        data+= ";LAT:"+str(self.latitude)+","+self.lat_ne
+        data+= ";LON:"+str(self.longitude)+","+self.lon_we
+        data+= ";LAT:"+str(self.latitude)+","+self.lat_ns
         data+= ";P_ERR:"+str(self.pos_err)
         self.publisher.send_string(data)
         
@@ -219,8 +219,8 @@ class gpsReader():
     def sendZMQAll(self):
         data = "ID:"+str(self.zmqID)
         data+= ";TIME:"+str(self.gps_time)
-        data+= ";LON:"+str(self.longitude)+","+self.lon_ws
-        data+= ";LAT:"+str(self.latitude)+","+self.lat_ne
+        data+= ";LON:"+str(self.longitude)+","+self.lon_we
+        data+= ";LAT:"+str(self.latitude)+","+self.lat_ns
         data+= ";P_ERR:"+str(self.pos_err)
         data+= ";DIR:"+str(self.gps_dir)
         self.publisher.send_string(data)
