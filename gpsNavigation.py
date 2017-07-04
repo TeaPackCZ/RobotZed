@@ -121,31 +121,32 @@ class gpsNavigation:
         sys.exit(0)
 
     def updateData(self,line):
-        if(line.find("TIME") < 0):
-            self.logger.save_line("Ignoring sentense: <" + line + ">")
-        else:
-            lineSplit = line.split(";")
-            gpsid = lineSplit[0].split(":")[1]
-            if(gpsid in self.GPSData.IDKey):
-                gpid = self.GPSData.IDKey[gpsid]
-                self.GPSData.shift(gpid)
-                for item in lineSplit:
-                    if(self.GPSData.update(gpid,item) == -1):
-                       self.logger.save_line("Unsupported sentence : <"
-                                             + item + ">")
+        lineSplit = line.split(";")
+        gpsid = lineSplit[0].split(":")[1]
+        if(gpsid in self.GPSData.IDKey):
+            gpid = self.GPSData.IDKey[gpsid]
+            self.GPSData.shift(gpid)
+            for item in lineSplit:
+                if(self.GPSData.update(gpid,item) == -1):
+                   self.logger.save_line("Unsupported sentence : <"
+                                         + item + ">")
     
     def run(self):
         while(self.enabled):
             message = self.subscriber.recv_string()
-            self.logger.save_line(message)
-            self.updateData(message)
-            if(self.GPSData.consistent()):
-                lon,lat = self.GPSData.getCorrectedPosition()
-                self.logger.save_line("New position: LON: "
-                                      + str(lon) + " LAT: "
-                                      + str(lat))
-                # watchdog = 0
+            if(message.find("ID:GPS")>=0):
+                self.updateData(message)
+                if(self.GPSData.consistent()):
+                    # watchdog = 0
+                    if(self.waypointSet):
+                        pass
+                    else:
+                        lon,lat = self.GPSData.getCorrectedPosition()
+                        self.logger.save_line("New position: LON: "
+                                              + str(lon) + " LAT: "
+                                              + str(lat))
             else:
+                self.logger.save_line("Ignoring sentense: <" + message + ">")
                 # watchdog ++
                 # if watchdog >= FiltLen:
                 #   GPSdata.useOneSourceOnly == True
