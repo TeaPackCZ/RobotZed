@@ -16,8 +16,6 @@ class gpsData:
         self.Lat = np.zeros((2,self.lengthOfFilter),np.float)
         self.PErr = np.zeros((2,self.lengthOfFilter),np.float)
         self.dir = np.zeros((2,self.lengthOfFilter),np.float)
-
-        self.filterIndex = 0
         
         self.Time = [0,0]
 
@@ -43,16 +41,16 @@ class gpsData:
             else:
                 itemVal = -float(pos)
         if(itemid == "LON"):
-            self.Lon[sensorID,self.filterIndex] = itemVal
+            self.Lon[sensorID,0] = itemVal
             return 0
         elif(itemid == "LAT"):
-            self.Lat[sensorID,self.filterIndex] = itemVal
+            self.Lat[sensorID,0] = itemVal
             return 0            
         elif(itemid == "P_ERR"):
-            self.PErr[sensorID,self.filterIndex] = float(itemVal)
+            self.PErr[sensorID,0] = float(itemVal)
             return 0
         elif(itemid == "DIR"):
-            self.dir[sensorID,self.filterIndex] = int(itemVal)
+            self.dir[sensorID,0] = int(itemVal)
             return 0
         elif(itemid == "TIME"):
             self.Time[sensorID] = float(itemVal)
