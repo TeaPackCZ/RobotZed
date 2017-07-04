@@ -113,13 +113,13 @@ class gpsNavigation:
     def sigINT_Handler(self, signal, frame):
         print("\ngpsNavigation detected SigINT signal")
         self.logger.save_line("Signal SigINT detected")
+        self.enabled = False
         for port in self.InPorts:
             self.subscriber.disconnect('tcp://127.0.0.1:'+port)
-            self.logger.save_line("Disconnected from local port: " + port)
-        for port in self.InPorts:
-            self.subscriber.unbind('tcp://127.0.0.1:'+port)
-            self.logger.save_line("Disconnected from local port: " + port)
-        self.enabled = False
+            self.logger.save_line("SUB Disconnected from local port: " + port)
+        for port in self.OutPorts:
+            self.publisher.disconnect('tcp://127.0.0.1:'+port)
+            self.logger.save_line("PUB Disconnected from local port: " + port)
         sys.exit(0)
 
     def updateData(self,line):
