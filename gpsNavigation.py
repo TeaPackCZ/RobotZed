@@ -70,7 +70,7 @@ class gpsData:
         return data
 
     def consistent(self):
-        return (self.Time[0] == self.Time[1])
+        return (self.Time[0] == self.Time[1]) and (self.Time[0] > 1)
 
     def getCorrectedPosition(self):
         # get realdistance from points
