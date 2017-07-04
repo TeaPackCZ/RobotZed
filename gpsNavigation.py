@@ -96,6 +96,7 @@ class gpsNavigation:
         self.publisher = zMQC.socket(zmq.PUB)
 
         self.GPSData = gpsData(5)
+        self.waypointSet = False
 
         for port in self.InPorts:
             self.subscriber.connect('tcp://127.0.0.1:'+port)
@@ -130,6 +131,13 @@ class gpsNavigation:
                 if(self.GPSData.update(gpid,item) == -1):
                    self.logger.save_line("Unsupported sentence : <"
                                          + item + ">")
+
+    def updateWayPoint(self,line):
+        lineSplit = line.split(";")
+        self.WayPoint = [ lineSplit[1].split(":")[1]
+                        , lineSplit[2].split(":")[1]
+                        , lineSplit[3].split(":")[1] ]
+        self.waypointSet = True
     
     def run(self):
         while(self.enabled):
