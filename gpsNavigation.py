@@ -6,7 +6,7 @@ from time import sleep
 from Logger import Logger
 import numpy as np
 
-class gpsData:
+class gpsNavigation:
     def __init__(self,lenOfFilter):
         self.lengthOfFilter = lenOfFilter
         self.ItemKey = {"ID":0,"TIME":1,"LON":2,"LAT":3,"P_ERR":4,"DIR":5}
@@ -83,7 +83,7 @@ class gpsData:
         corErr = np.mean(self.PErr,0)[0]
         return corLon,corLat
         
-class gpsNavigation:
+class gpsModule:
     def __init__(self):
         
         self.logger = Logger("gpsNavigation")
@@ -95,7 +95,7 @@ class gpsNavigation:
         self.subscriber = zMQC.socket(zmq.SUB)
         self.publisher = zMQC.socket(zmq.PUB)
 
-        self.GPSData = gpsData(5)
+        self.GPSData = gpsNavigation(5)
         self.waypointSet = False
 
         for port in self.InPorts:
@@ -164,5 +164,5 @@ class gpsNavigation:
                 #   pass (wait for next update)
                 sleep(0.0001)
 
-C = gpsNavigation()
+C = gpsModule()
 C.run()
