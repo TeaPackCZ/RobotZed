@@ -2,6 +2,7 @@
 
 python zmqLogger.py &
 
+python main.py &
 python gpsNavigation.py &
 
 #python gpsReader.py /dev/ttyS3 38400 10101 GPS1 &
