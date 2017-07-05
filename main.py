@@ -9,7 +9,7 @@ class master:
         self.logger = Logger("mainLog")
 
         self.InPorts = ["10111","10201"]
-        self.OutPorts = ["10301","10202"]
+        self.OutPorts = ["10300"]
 
         self.enabled = True
         signal.signal(signal.SIGINT, self.sigINT_Handler)

@@ -109,7 +109,7 @@ class gpsModule:
     def __init__(self):
         
         self.logger = Logger("gpsNavigation")
-        self.InPorts = ["10101","10102","10301"]
+        self.InPorts = ["10101","10102","10300"]
         self.OutPorts = ["10111"]
         self.enabled = True
         signal.signal(signal.SIGINT, self.sigINT_Handler)
