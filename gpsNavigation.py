@@ -83,6 +83,27 @@ class gpsNavigation:
         corErr = np.mean(self.PErr,0)[0]
         return corLon,corLat,corErr
 
+
+    def getDirAndDist(self,waypoint):
+        curLat,curLon,curErr = self.getCorrectedPosition()
+        dLat = waypoint[0] - curLat
+        dLon = waypoint[1] - curLon
+
+        distance = None
+        angle = None
+
+        if(abs(dLat) < 0.5) and (abs(dLon) < 0.5):
+            LongitudeRadius = np.cos(curLat/180.0*np.pi)*6378137.0 # [m]
+            LonDegreseLength = LongitudeRadius*2*np.pi/360.0
+            LatDegreseLength = np.pi*np.sqrt(2*(6378137.0**2+6356752.3**2))/360.0
+
+            dLatMetric = dLat * LatDegreseLength
+            dLonMetric = dLon * LonDegreseLength
+
+            angle = round(np.arctan(dLatMetric/dLonMetric)/np.pi*180);
+            distance = np.hypot(dLatMetric,dLonMetric)
+        
+        return distance,angle
         
 class gpsModule:
     def __init__(self):
@@ -97,6 +118,7 @@ class gpsModule:
         self.publisher = zMQC.socket(zmq.PUB)
 
         self.GPSData = gpsNavigation(5)
+        self.WayPoint = np.zeros((3),np.float)
         self.waypointSet = False
 
         for port in self.InPorts:
@@ -135,9 +157,9 @@ class gpsModule:
 
     def updateWayPoint(self,line):
         lineSplit = line.split(";")
-        self.WayPoint = [ lineSplit[1].split(":")[1]
-                        , lineSplit[2].split(":")[1]
-                        , lineSplit[3].split(":")[1] ]
+        self.WayPoint = [ float(lineSplit[1].split(":")[1])
+                        , float(lineSplit[2].split(":")[1])
+                        , float(lineSplit[3].split(":")[1]) ]
         self.waypointSet = True
     
     def run(self):
@@ -148,7 +170,9 @@ class gpsModule:
                 if(self.GPSData.consistent()):
                     # watchdog = 0
                     if(self.waypointSet):
-                        pass
+                        dist,azim = self.GPSData.getDirAndDist(self.WayPoint)
+                        self.publisher.send_string("ID:NAV;DIST:"+str(dist)
+                                                   +";AZIM:"+str(azim))
                     else:
                         lon,lat,err = self.GPSData.getCorrectedPosition()
                         self.logger.save_line("New position: LON: "
