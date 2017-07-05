@@ -81,7 +81,8 @@ class gpsNavigation:
         corLat = np.mean(self.Lat,0)[0]
         corLon = np.mean(self.Lon,0)[0]
         corErr = np.mean(self.PErr,0)[0]
-        return corLon,corLat
+        return corLon,corLat,corErr
+
         
 class gpsModule:
     def __init__(self):
@@ -149,7 +150,7 @@ class gpsModule:
                     if(self.waypointSet):
                         pass
                     else:
-                        lon,lat = self.GPSData.getCorrectedPosition()
+                        lon,lat,err = self.GPSData.getCorrectedPosition()
                         self.logger.save_line("New position: LON: "
                                               + str(lon) + " LAT: "
                                               + str(lat))
