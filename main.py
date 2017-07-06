@@ -70,7 +70,8 @@ class master:
         #WaitForStartingWindow (if any)
         for waypoint in waypoints:
             self.SetWaypoint(waypoint)
-            while(!atWaypoint)
+            atWaypoint = False
+            while(not atWaypoint):
                 self.checkAll()
                 sleep(0.2)
         #       updateAll
