@@ -18,6 +18,10 @@ class gpsReader():
         self.zmqPort = "10000"
         self.mserial = ""
         self.zmqID = "defaultGPS"
+
+        self.parsedVTG = -1
+        self.parsedGGA = -1
+        self.parsedGLL = -1
         
         self.get_args()
 
