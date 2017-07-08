@@ -6,6 +6,14 @@ from time import sleep
 from Logger import Logger
 import numpy as np
 
+class gpsPoint:
+    def __init__(self, x, y, e=0):
+        self.x = x
+        self.y = y
+        self.Lat = x*np.pi/180.0
+        self.Lon = y*np.pi/180.0
+        self.Err = e
+
 class gpsNavigation:
     def __init__(self,lenOfFilter):
         self.lengthOfFilter = lenOfFilter
