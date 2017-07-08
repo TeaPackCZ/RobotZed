@@ -7,7 +7,7 @@ from Logger import Logger
 import numpy as np
 
 class gpsPoint:
-    def __init__(self, x, y, e=0):
+    def __init__(self, x, y, e=10):
         self.x = x
         self.y = y
         self.Lat = x*np.pi/180.0
