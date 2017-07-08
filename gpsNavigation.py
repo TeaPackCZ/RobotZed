@@ -89,27 +89,28 @@ class gpsNavigation:
         corLat = np.mean(self.Lat,0)[0]
         corLon = np.mean(self.Lon,0)[0]
         corErr = np.mean(self.PErr,0)[0]
-        return corLon,corLat,corErr
+        curPos = gpsPoint(corLat,corLon,corErr)
+        return curPos
 
 
-    def getDirAndDist(self,waypoint):
-        curLat,curLon,curErr = self.getCorrectedPosition()
-        dLat = waypoint[0] - curLat
-        dLon = waypoint[1] - curLon
+    def getDirAndDist(self,wayPoint):
+        curPos = self.getCorrectedPosition()
+        dLat = wayPoint.Lat - curPos.Lat
+        dLon = wayPoint.Lon - curPos.Lon
+
+        R = 6378137.0
 
         distance = None
         angle = None
 
-        if(abs(dLat) < 0.5) and (abs(dLon) < 0.5):
-            LongitudeRadius = np.cos(curLat/180.0*np.pi)*6378137.0 # [m]
-            LonDegreseLength = LongitudeRadius*2*np.pi/360.0
-            LatDegreseLength = np.pi*np.sqrt(2*(6378137.0**2+6356752.3**2))/360.0
+        ## Based on Orthrodromic navigation - see wiki
+        alf = 2*np.arcsin(np.sqrt((np.sin((dLat)/2)**2
+              +np.cos(wayPoint.Lat)*np.cos(curPos.Lat)*(dLon/2)**2)))
 
-            dLatMetric = dLat * LatDegreseLength
-            dLonMetric = dLon * LonDegreseLength
-
-            angle = round(np.arctan(dLatMetric/dLonMetric)/np.pi*180);
-            distance = np.hypot(dLatMetric,dLonMetric)
+        angle = (np.arcsin((np.cos(wayPoint.Lat)*np.sin(dLon))/np.sin(alf))
+                 /np.pi*180)%360
+        
+        distance = alf*R
         
         return distance,angle
         
@@ -126,7 +127,7 @@ class gpsModule:
         self.publisher = zMQC.socket(zmq.PUB)
 
         self.GPSData = gpsNavigation(5)
-        self.WayPoint = np.zeros((3),np.float)
+        self.WayPoint = gpsPoint(0,0,0)
         self.waypointSet = False
 
         for port in self.InPorts:
@@ -165,9 +166,10 @@ class gpsModule:
 
     def updateWayPoint(self,line):
         lineSplit = line.split(";")
-        self.WayPoint = [ float(lineSplit[1].split(":")[1])
+        self.WayPoint = gpsPoint(
+                          float(lineSplit[1].split(":")[1])
                         , float(lineSplit[2].split(":")[1])
-                        , float(lineSplit[3].split(":")[1]) ]
+                        , float(lineSplit[3].split(":")[1]) )
         self.waypointSet = True
     
     def run(self):
