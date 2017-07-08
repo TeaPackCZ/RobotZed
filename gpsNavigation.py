@@ -109,6 +109,12 @@ class gpsNavigation:
 
         angle = (np.arcsin((np.cos(wayPoint.Lat)*np.sin(dLon))/np.sin(alf))
                  /np.pi*180)%360
+
+        if(dLat < 0):
+            if(dLon < 0):
+                angle -= 90
+            else:
+                angle += 90
         
         distance = alf*R
         
