@@ -73,7 +73,7 @@ class master:
             atWaypoint = False
             while(not atWaypoint):
                 self.checkAll()
-                sleep(0.2)
+                sleep(0.1)
         #       updateAll
         #   MarkWaypoint/Goal
         #Play4Winner
