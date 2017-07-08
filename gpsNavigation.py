@@ -204,6 +204,3 @@ class gpsModule:
                 # else:
                 #   pass (wait for next update)
                 sleep(0.0001)
-
-C = gpsModule()
-C.run()
