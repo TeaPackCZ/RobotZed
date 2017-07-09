@@ -19,24 +19,24 @@ class gpsNavigation:
         self.lengthOfFilter = lenOfFilter
         self.ItemKey = {"ID":0,"TIME":1,"LON":2,"LAT":3,"P_ERR":4,"DIR":5}
         self.IDKey = {"GPS1":0, "GPS2":1}
-        
-        self.Lon = np.zeros((2,self.lengthOfFilter),np.float)
-        self.Lat = np.zeros((2,self.lengthOfFilter),np.float)
-        self.PErr = np.zeros((2,self.lengthOfFilter),np.float)
+
+        p0 = gpsPoint(0,0)
+        self.gpsPoints = [[],[]]
+        for i in range(lenOfFilter):
+            self.gpsPoints[0].append(p0)
+            self.gpsPoints[1].append(p0)
+
+        self.gpsWayPoint = gpsPoint(0,0)
+
         self.dir = np.zeros((2,self.lengthOfFilter),np.float)
-        
         self.Time = [0,0]
 
     def shift(self,sensorID):
         for j in range(self.lengthOfFilter-2,-1,-1):
-            self.Lon[sensorID,j+1] = self.Lon[sensorID,j]
-            self.Lat[sensorID,j+1] = self.Lat[sensorID,j]
-            self.PErr[sensorID,j+1] = self.PErr[sensorID,j]
+            self.gpsPoints[sensorID][j+1] = self.gpsPoints[sensorID][j]
             self.dir[sensorID,j+1] = self.dir[sensorID,j]
 
-        self.Lon[sensorID,0] = 0
-        self.Lat[sensorID,0] = 0
-        self.PErr[sensorID,0] = 0
+        self.gpsPoints[sensorID][0] = gpsPoint(0,0)
         self.dir[sensorID,0] = 0
 
     def update(self,sensorID,datastring):
@@ -49,13 +49,13 @@ class gpsNavigation:
             else:
                 itemVal = -float(pos)
         if(itemid == "LON"):
-            self.Lon[sensorID,0] = itemVal
+            self.gpsPoints[sensorID][0].Lon = itemVal
             return 0
         elif(itemid == "LAT"):
-            self.Lat[sensorID,0] = itemVal
+            self.gpsPoints[sensorID][0].Lat = itemVal
             return 0            
         elif(itemid == "P_ERR"):
-            self.PErr[sensorID,0] = float(itemVal)
+            self.gpsPoints[sensorID][0].Err = float(itemVal)
             return 0
         elif(itemid == "DIR"):
             self.dir[sensorID,0] = int(itemVal)
@@ -70,9 +70,9 @@ class gpsNavigation:
 
     def getDataString(self,sensorID):
         data  = "SensorID:" + str(sensorID)
-        data += ";LON:" + str(self.Lon[sensorID,0])
-        data += ";LAT:" + str(self.Lat[sensorID,0])
-        data += ";P_ERR:" + str(self.PErr[sensorID,0])
+        data += ";LON:" + str(self.gpsPoints[sensorID][0].Lon)
+        data += ";LAT:" + str(self.gpsPoints[sensorID][0].Lat)
+        data += ";P_ERR:" + str(self.gpsPoints[sensorID][0].PErr)
         data += ";DIR:" + str(self.dir[sensorID,0])
         data += ";TIME:" + str(self.Time[sensorID])
         return data
@@ -86,17 +86,16 @@ class gpsNavigation:
         #       compute new position with higher precision
         #   else:
         #       compute new position with lower precision
-        corLat = np.mean(self.Lat,0)[0]
-        corLon = np.mean(self.Lon,0)[0]
-        corErr = np.mean(self.PErr,0)[0]
-        curPos = gpsPoint(corLat,corLon,corErr)
+        corX = (self.gpsPoints[0][0].x + self.gpsPoints[1][0].x) / 2.0
+        corY = (self.gpsPoints[0][0].y + self.gpsPoints[1][0].y) / 2.0
+        corErr = (self.gpsPoints[0][0].Err + self.gpsPoints[1][0].Err) / 2.0
+        curPos = gpsPoint(corX,corY,corErr)
         return curPos
 
-
-    def getDirAndDist(self,wayPoint):
-        curPos = self.getCorrectedPosition()
-        dLat = wayPoint.Lat - curPos.Lat
-        dLon = wayPoint.Lon - curPos.Lon
+    def getDirAndDist(self,A,B):
+        # You are at point A and want to go to point B
+        dLat = B.Lat - A.Lat
+        dLon = B.Lon - A.Lon
 
         R = 6378137.0
 
@@ -105,9 +104,9 @@ class gpsNavigation:
 
         ## Based on Orthrodromic navigation - see wiki
         alf = 2*np.arcsin(np.sqrt((np.sin((dLat)/2)**2
-              +np.cos(wayPoint.Lat)*np.cos(curPos.Lat)*(dLon/2)**2)))
+              +np.cos(B.Lat)*np.cos(A.Lat)*(dLon/2)**2)))
 
-        angle = (np.arcsin((np.cos(wayPoint.Lat)*np.sin(dLon))/np.sin(alf))
+        angle = (np.arcsin((np.cos(B.Lat)*np.sin(dLon))/np.sin(alf))
                  /np.pi*180)%360
 
         if(dLat < 0):
@@ -189,14 +188,15 @@ class gpsModule:
                 if(self.GPSData.consistent()):
                     # watchdog = 0
                     if(self.waypointSet):
-                        dist,azim = self.GPSData.getDirAndDist(self.WayPoint)
+                        A = self.GPSData.getCorrectedPosition()
+                        dist,azim = self.GPSData.getDirAndDist(A,self.WayPoint)
                         self.publisher.send_string("ID:NAV;DIST:"+str(dist)
                                                    +";AZIM:"+str(azim))
                     else:
-                        lon,lat,err = self.GPSData.getCorrectedPosition()
+                        A = self.GPSData.getCorrectedPosition()
                         self.logger.save_line("New position: LON: "
-                                              + str(lon) + " LAT: "
-                                              + str(lat))
+                                              + str(A.lon) + " LAT: "
+                                              + str(A.lat))
             elif(message.find("ID:MAIN")>=0):
                 self.updateWayPoint(message)
             else:
