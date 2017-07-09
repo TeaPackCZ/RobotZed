@@ -21,13 +21,15 @@ class TestLogger(unittest.TestCase):
         
     def test_logging(self):
         testLog = Logger("testLog")
-        testLog.save_line("TestLine")
+        testPhrase = "TestLine\r\n"
+        testLog.save_line(testPhrase)
         testLog.close()
         logfile = open(testLog.name)
         content = logfile.read()
         logfile.close()
         saved = content.split(" : ")
-        self.assertEqual(saved[1],"TestLine")
+        ## Check if saved data corresponds
+        self.assertEqual(saved[1],testPhrase)
         ## cleanup
         os.remove(testLog.name)
 
