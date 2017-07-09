@@ -116,7 +116,8 @@ class gpsNavigation:
             else:
                 angle += 90
         
-        distance = alf*R
+        distance = np.round(alf*R)
+        angle = np.round(angle)
         
         return distance,angle
         
