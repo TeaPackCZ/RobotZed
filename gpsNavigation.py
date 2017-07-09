@@ -113,8 +113,10 @@ class gpsNavigation:
         if(dLat < 0):
             if(dLon < 0):
                 angle -= 90
-            else:
+            elif(dLon>0):
                 angle += 90
+            else:
+                angle += 180
         
         distance = np.round(alf*R)
         angle = np.round(angle)
