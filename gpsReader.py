@@ -14,8 +14,12 @@ class gpsReader():
         self.enabled = True
         self.manSerial = False
         self.normalRun = True
+
+        self.ToWrite = False
+
         self.serBaud = 38400
-        self.zmqPort = "10000"
+        self.zmqOutPort = "10100"
+        self.zmqInPort = "10300"
         self.mserial = ""
         self.zmqID = "defaultGPS"
 
@@ -27,6 +31,7 @@ class gpsReader():
 
         zmq_cont = zmq.Context()
         self.publisher = zmq_cont.socket(zmq.PUB)
+        self.subscriber = zmq_cont.socket(zmq.SUB)
 
         signal.signal(signal.SIGINT, self.sigINT_Handler)
         self.logger = Logger(self.zmqID)
@@ -38,7 +43,7 @@ class gpsReader():
         print (self.zmqID + " detected SigINT signal")
         self.logger.save_line("Signal SigINT detected")
         self.enabled = False
-        self.publisher.disconnect('tcp://127.0.0.1:'+str(self.zmqPort))
+        self.publisher.disconnect('tcp://127.0.0.1:'+str(self.zmqOutPort))
         if self.normalRun:
             self.ser.close()
         self.logger.close()
@@ -65,13 +70,13 @@ class gpsReader():
             self.mbaud = int(sys.argv[2])
 
         if(len(sys.argv) >= 4):
-            self.zmqPort = str(sys.argv[3])
+            self.zmqOutPort = str(sys.argv[3])
 
         if(len(sys.argv) >= 5):
             self.zmqID = str(sys.argv[4])
 
         print("Settings -> Serial: " + self.mserial + " speed: "
-              + str(self.mbaud) + " ZMQ port: " + self.zmqPort
+              + str(self.mbaud) + " ZMQ port: " + self.zmqOutPort
               + " gps ID: " + str(self.zmqID))
        
     def connect_serial(self):
@@ -282,24 +287,85 @@ class gpsReader():
         for i in range(10):
             if(self.LogData[i].find("RMC") >= 0):
                 return i
-        
+
+    def parseMessage(self, data):
+        if(data.find(self.zmqID)>=0):
+            split = data.split(";")
+            for item in split:
+                name,value = item.split(":")
+                if(value.find("COLDSTART") >= 0):
+                    self.ToWrite = True
+                    self.MsgType = "COLD"
+                elif(value.find("WARMSTART")>=0):
+                    self.ToWrite = True
+                    self.MsgType = "WARM"
+                else:
+                    self.logger.save_line("Unsupported message: <" +data
+                                          + "> with argument: <" + value + ">")
+        else:
+            self.logger.save_line("Unrecognized message: <" +data+ ">")
+                    
+
+    def ColdStart(self):
+        #msg = [0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0xFF, 0xFF, 0x02, 0x00, 0x0E, 0x61]
+        msg = 'B56206040400FFFF02000E61'
+        self.logger.save_line("Cold start requested")
+        if self.normalRun:
+            success = self.ser.write(msg.decode("hex"))
+        else:
+            success = True
+            self.logger.save_line("Message: <" + msg + ">")
+        return success
+
+    def WarmStart(self):
+        #msg = [0xB5, 0x62, 0x06, 0x04, 0x04, 0x00, 0x01, 0x00, 0x02, 0x00, 0x11, 0x6C]
+        msg = 'B5620604040001000200116C'
+        self.logger.save_line("Warm start requested")
+        if self.normalRun:
+            success = self.ser.write(msg.decode("hex"))
+        else:
+            success = True
+            self.logger.save_line("Message: <" + msg + ">")
+        return success
+
+    def writeMessage(self):
+        self.ToWrite = False
+        if(self.MsgType is "WARM"):
+            self.WarmStart()
+        elif(self.MsgType is "COLD"):
+            self.ColdStart()
+        else:
+            self.logger.save_line("Unsupported message type: <" + self.MsgType + ">")
+
     def main_loop(self):
         if self.normalRun:
             while self.enabled:
-                while(self.ser.readable()):
+                waitingMSG = self.subscriber.poll(20,zmq.POLLIN)
+                while(waitingMSG > 0):
+                    msg = self.subscriber.recv_string()
+                    self.parseMessage(msg)
+                    waitingMSG = self.subscriber.poll(20,zmq.POLLIN)
+                if(self.ser.writable() and self.ToWrite):
+                    self.writeMessage()
+                if(self.ser.readable()):
                     line = self.ser.readline()
                     self.sortLine(line)
-                    sleep(0.0001)
                 sleep(0.0001)
             self.ser.close()
-            
         else:
             lineIndex = self.syncLog()
             maxIndex = len(self.LogData)
             while(lineIndex < maxIndex):
+                waitingMSG = self.subscriber.poll(20,zmq.POLLIN)
+                while(waitingMSG > 0):
+                    msg = self.subscriber.recv_string()
+                    self.parseMessage(msg)
+                    waitingMSG = self.subscriber.poll(20,zmq.POLLIN)
+                if(self.ToWrite):
+                    self.writeMessage()
                 self.sortLine(self.LogData[lineIndex])
                 if(self.LogData[lineIndex].find("GLL") >= 0):
-                    sleep(0.2) ## corresponds to GPS settings (5Hz)
+                    sleep(0.1) ## corresponds to GPS settings (10Hz)
                 lineIndex += 1
             self.enabled = False
             
