@@ -99,7 +99,12 @@ class gpsReader():
                     logfile = open(self.mserial,'rb')
                     self.LogData = []
                     for line in logfile:
-                        self.LogData.append(line)
+                        if(line.find("$")>=0):
+                            if(line.find(" : ")>=0):
+                                splt = line.split(" : ")
+                                self.LogData.append(splt[1])
+                            else:
+                                self.LogData.append(line)
                     logfile.close()
                     return True
                 except:
@@ -109,17 +114,25 @@ class gpsReader():
  
     def connect_zmq(self):
         try:
-            self.publisher.bind('tcp://127.0.0.1:'+str(self.zmqPort))
-            self.logger.save_line("Binded to local port: " + self.zmqPort)
-            sleep(1)
+            self.publisher.bind('tcp://127.0.0.1:'+str(self.zmqOutPort))
+            self.logger.save_line("Binded to local port: " + self.zmqOutPort)
             self.publisher.send_string(self.zmqID + " binded on port "
-                                       + self.zmqPort)
-
-            return True
+                                       + self.zmqOutPort)
         except:
             self.logger.save_line("Failed to bind localPort "
-                                  + self.zmqPort)
+                                  + self.zmqOutPort)
+        try:
+            self.subscriber.connect('tcp://127.0.0.1:'+self.zmqInPort)
+            self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
+            self.logger.save_line("Connected to local port: " + self.zmqInPort)
+        except:
+            self.logger.save_line("Failed to connect localPort "
+                                  + self.zmqInPort)
             return False
+        finally:
+            sleep(1)
+            return True
+
 
     def parseRMC(self,line):
         ## RMC message:
