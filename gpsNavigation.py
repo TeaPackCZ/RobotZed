@@ -195,8 +195,8 @@ class gpsModule:
                     else:
                         A = self.GPSData.getCorrectedPosition()
                         self.logger.save_line("New position: LON: "
-                                              + str(A.lon) + " LAT: "
-                                              + str(A.lat))
+                                              + str(A.Lon) + " LAT: "
+                                              + str(A.Lat))
             elif(message.find("ID:MAIN")>=0):
                 self.updateWayPoint(message)
             else:
