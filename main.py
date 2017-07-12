@@ -59,6 +59,11 @@ class master:
             print("New msg: " + msg)
         print("Everything checked ^.^")
 
+    def initRobot(self):
+        sleep(1)
+        self.publisher.send_string("ID:GPS1;RESTART:COLDSTART")
+        self.publisher.send_string("ID:GPS2;RESTART:COLDSTART")
+
     def Game(self):
         waypoints = []
 
@@ -66,7 +71,7 @@ class master:
         waypoints.append("ID:MAIN;LON:14.1471803;LAT:49.3101150;ERR:3")
         waypoints.append("ID:MAIN;LON:14.1511122;LAT:49.3083453;ERR:3")
         
-        #WaitForSync
+        self.initRobot()
         #WaitForStartingWindow (if any)
         for waypoint in waypoints:
             self.SetWaypoint(waypoint)
