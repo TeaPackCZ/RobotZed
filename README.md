@@ -43,10 +43,7 @@ Install required packages:
 *    sudo apt install git python-zmq python-serial python-numpy
 
 You can also install some usefull packages:
-*    sudo apt install terminator htop nmap gitk git-gui rsync
-
-Add your user to group DIALOUT to acces serial ports
-*   sudo usermod -a -g dialout $USER
+*    sudo apt install terminator htop nmap gitk git-gui
 
 Clone this repository to your Pine:
 *   git clone https://github.com/TeaPackCZ/RobotZed.git
