@@ -33,8 +33,10 @@ your own user profile (sudo enabled) than you can directly setup your
  locals and timeZone data:
 *   dpkg-reconfigure tzdata
 *   dpkg-reconfigure locales
+*   apt-get remove unattended-upgrades
 
-Update cache to install new packages:
+Then you can reconnect under your account and update cache to install
+ new packages:
 *    sudo apt update
 
 Install required packages:
