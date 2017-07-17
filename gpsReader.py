@@ -26,6 +26,8 @@ class gpsReader():
         self.parsedVTG = -1
         self.parsedGGA = -1
         self.parsedGLL = -1
+
+        self.pos_err = -1
         
         self.get_args()
 
