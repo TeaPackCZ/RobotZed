@@ -22,9 +22,6 @@ class master:
             self.logger.save_line("Binded to port: " + port)
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
-        #self.poller = zmq.Poller()
-        #self.poller.register(self.subscriber, zmq.POLLIN)
-
         self.publisher = zMQC.socket(zmq.PUB)
 
         for port in self.OutPorts:
