@@ -52,9 +52,11 @@ class master:
         print("Waiting msgs: " +str(waitingMSG))
         while(waitingMSG > 0):
             msg = self.subscriber.recv_string()
+            self.parseMessage(msg)
             waitingMSG = self.subscriber.poll(100,zmq.POLLIN)
-            print("New msg: " + msg)
-        print("Everything checked ^.^")
+
+    def parseMessage(self,data):
+        return 0
 
     def initRobot(self):
         sleep(1)
