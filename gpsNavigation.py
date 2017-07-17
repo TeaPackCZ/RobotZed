@@ -126,8 +126,8 @@ class gpsModule:
     def __init__(self):
         
         self.logger = Logger("gpsNavigation")
-        self.InPorts = ["10101","10102","10300"]
-        self.OutPorts = ["10111"]
+        self.InPorts = ["10101","10102","10110"]
+        self.OutPorts = ["10105"]
         self.enabled = True
         signal.signal(signal.SIGINT, self.sigINT_Handler)
         zMQC = zmq.Context()

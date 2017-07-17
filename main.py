@@ -8,7 +8,7 @@ class master:
     def __init__(self):
         self.logger = Logger("mainLog")
 
-        self.InPorts = ["10111","10201"]
+        self.InPorts = ["10105","10201"]
         self.OutPortGPS = "10110"
         self.OutPortMBED = "10210"
 
