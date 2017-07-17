@@ -9,7 +9,8 @@ class master:
         self.logger = Logger("mainLog")
 
         self.InPorts = ["10111","10201"]
-        self.OutPorts = ["10300"]
+        self.OutPortGPS = "10110"
+        self.OutPortMBED = "10210"
 
         self.enabled = True
         signal.signal(signal.SIGINT, self.sigINT_Handler)
@@ -22,11 +23,13 @@ class master:
             self.logger.save_line("Binded to port: " + port)
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
-        self.publisher = zMQC.socket(zmq.PUB)
+        self.publisherGPS = zMQC.socket(zmq.PUB)
+        self.publisherGPS.bind('tcp://127.0.0.1:'+self.OutPortGPS)
+        self.logger.save_line("PublisherGPS connected to port: " + self.OutPortGPS)
 
-        for port in self.OutPorts:
-            self.publisher.bind('tcp://127.0.0.1:'+port)
-            self.logger.save_line("Connected to port: " + port)
+        self.publisherMBED = zMQC.socket(zmq.PUB)
+        self.publisherMBED.bind('tcp://127.0.0.1:'+self.OutPortMBED)
+        self.logger.save_line("PublisherMBED connected to port: " + self.OutPortMBED)
         
         sleep(0.5)
         
@@ -36,14 +39,18 @@ class master:
         self.enabled = False
         for port in self.InPorts:
             self.subscriber.disconnect('tcp://127.0.0.1:'+port)
-            self.logger.save_line("SUB Disconnected from local port: " + port)
-        for port in self.OutPorts:
-            self.publisher.disconnect('tcp://127.0.0.1:'+port)
-            self.logger.save_line("PUB Disconnected from local port: " + port)
+            self.logger.save_line("SUB disconnected from local port: " + port)
+        
+        self.publisherGPS.disconnect('tcp://127.0.0.1:'+self.OutPortGPS)
+        self.logger.save_line("PUB_GPS disconnected from local port: " + self.OutPortGPS)
+
+        self.publisherMBED.disconnect('tcp://127.0.0.1:'+self.OutPortMBED)
+        self.logger.save_line("PUB_MBED disconnected from local port: " + self.OutPortMBED)
+        
         sys.exit(0)
 
     def SetWaypoint(self,data):
-        self.publisher.send_string(data)
+        self.publisherGPS.send_string(data)
 
     def checkAll(self):
         msg = ""
@@ -60,8 +67,8 @@ class master:
 
     def initRobot(self):
         sleep(1)
-        self.publisher.send_string("ID:GPS1;RESTART:COLDSTART")
-        self.publisher.send_string("ID:GPS2;RESTART:COLDSTART")
+        self.publisherGPS.send_string("ID:GPS1;RESTART:COLDSTART")
+        self.publisherGPS.send_string("ID:GPS2;RESTART:COLDSTART")
 
     def Game(self):
         waypoints = []
