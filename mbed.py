@@ -22,6 +22,7 @@ class mbed:
         for port in self.InPorts:
             self.subscriber.connect('tcp://127.0.0.1:'+port)
             self.logger.save_line("Binded to port: " + port)
+            sleep(0.5)
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
         self.publisher = zMQC.socket(zmq.PUB)
@@ -29,6 +30,7 @@ class mbed:
         for port in self.OutPorts:
             self.publisher.bind('tcp://127.0.0.1:'+port)
             self.logger.save_line("Connected to port: " + port)
+            sleep(0.5)
 
         self.get_args()
         self.connect_serial()
