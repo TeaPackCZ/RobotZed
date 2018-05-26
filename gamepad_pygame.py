@@ -37,7 +37,7 @@ class MyZMQ:
         self.disconected = True
         self.enabled = True
 
-        self.zmqPort = 10501
+        self.zmqPort = 10000
 
         self.zmqID = "-1"
         zmq_cont = zmq.Context()
