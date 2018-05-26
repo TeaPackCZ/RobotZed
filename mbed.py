@@ -130,14 +130,21 @@ class mbed:
 
     def parse_zmq_message(self,data):
         self.logger.save_line("Receives ZMQ message: <" + data + ">")
+        self.msgToWrite = data
+        self.toWrite = True
 
     def parse_serial_message(self,data):
         self.logger.save_line("Receives serial message: <" + data + ">")
         
     def run(self):
         self.logger.save_line("mbed loop started...")
+        print "Waitin for update..."
+        self.toWrite = False
+        sleep(1)
         while(self.enabled):
             self.recvUpdate()
+            if(self.toWrite):
+                self.serial.write(self.magToWrite)
             sleep(0.1)
 
 M = mbed()
