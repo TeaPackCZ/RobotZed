@@ -93,7 +93,7 @@ class MyGamePad:
         pygame.joystick.init()
 
         self.mbed = MyZMQ()
-        self.mbed.connect()
+        self.mbed.connect_zmq()
         
         self.my_clock = pygame.time.Clock()
         self.num_of_gamepads = pygame.joystick.get_count()
