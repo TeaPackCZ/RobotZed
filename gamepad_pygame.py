@@ -43,9 +43,9 @@ class MyZMQ:
         zmq_cont = zmq.Context()
         self.publisher = zmq_cont.socket(zmq.PUB)
 
-    def sigINT_Handler(signal, frame):
+        def sigINT_Handler(signal, frame):
             print("\nYou pressed Ctrl+C")
-            self.publisher.disconnect('tcp://127.0.0.1:'+str(self.zmqPo$
+            self.publisher.disconnect('tcp://127.0.0.1:'+str(self.zmqPort))
             self.ser.close()
             self.enabled = False
             self.mfile.flush()
@@ -55,7 +55,10 @@ class MyZMQ:
         signal.signal(signal.SIGINT, sigINT_Handler)
 
         self.get_args()
-        self.disconnected = self.connect_zmq()
+        self.disconnected = not self.connect_zmq()
+
+    def get_args(self):
+        pass
 
     def connect_zmq(self):
         try:
