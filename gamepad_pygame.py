@@ -58,7 +58,18 @@ class MyZMQ:
         self.disconnected = not self.connect_zmq()
 
     def get_args(self):
-        pass
+        if(len(sys.argv) < 2):
+            print ("Usage: " + str(sys.argv[0]) + " <ZMQPort> <ID>" )
+            sys.exit(0)
+
+        if(len(sys.argv) >= 2):
+            self.zmqPort = str(sys.argv[1])
+
+        if(len(sys.argv) >= 3):
+            self.zmqID = str(sys.argv[2])
+
+        print("Settings -> ZMQ port: " + self.zmqPort
+              + " ID: " + str(self.zmqID))
 
     def connect_zmq(self):
         try:
