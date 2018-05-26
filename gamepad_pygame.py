@@ -103,8 +103,8 @@ class MyGamePad:
         pygame.init()
         pygame.joystick.init()
 
-        self.mbed = MyZMQ()
-        self.mbed.connect_zmq()
+        self.zMQ = MyZMQ()
+        self.zMQ.connect_zmq()
         
         self.my_clock = pygame.time.Clock()
         self.num_of_gamepads = pygame.joystick.get_count()
@@ -146,7 +146,7 @@ class MyGamePad:
         self.hatPos = [" ", "+", "-"]
         
         self.main_loop()
-        self.mbed.disconnect()
+        self.zMQ.disconnect()
         self.deinit()
         
     def check_buttons_down(self):
@@ -213,7 +213,7 @@ class MyGamePad:
             for i in range(self.axes_num):
                 self.axis_state[i] = self.my_gamepad.get_axis(i)
 
-            self.mbed.send_diff_move(-self.axis_state[1], -self.axis_state[3])
+            self.zMQ.send_diff_move(-self.axis_state[1], -self.axis_state[3])
 
             if(self.own_window):
                 for i in range( self.axes_num ):
@@ -230,7 +230,7 @@ class MyGamePad:
 
     def btn_1_pressed(self):
         print ("Stop robot ... ")
-        self.mbed.send_string("$setD,M,0,0\r\n")
+        self.zMQ.send_string("$setD,M,0,0\r\n")
 
     def btn_A_pressed(self):
         print ("Start ZMQ")
@@ -238,11 +238,11 @@ class MyGamePad:
 
     def btn_back_pressed(self):
         print ("EXIT ... ")
-        self.mbed.send_string("$setD,T,0,0,\r\n")
+        self.zMQ.send_string("$setD,T,0,0,\r\n")
         self.enabled = False
 
     def btn_start_pressed(self):
         print ("Enable robot ... ")
-        self.mbed.send_string("$setD,M,1,1\r\n")
+        self.zMQ.send_string("$setD,M,1,1\r\n")
 
 logitechFX710 = MyGamePad()
