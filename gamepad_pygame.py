@@ -137,7 +137,7 @@ class MyGamePad:
     def check_buttons_down(self):
         for i in range( self.btns_num):
             if(self.btns_state[i] is not self.my_gamepad.get_button(i)):
-                print ("Button " + str(i) + " was pressed...")
+                #print ("Button " + str(i) + " was pressed...")
                 if( i == 2 ): ## RED B button
                     self.btn_1_pressed()
                 elif( i == 1): ## Green A button
@@ -152,7 +152,7 @@ class MyGamePad:
     def check_buttons_up(self):
         for i in range( self.btns_num):
             if(self.btns_state[i] is not self.my_gamepad.get_button(i)):
-                print ("Button " + str(i) + " was released...")
+                #print ("Button " + str(i) + " was released...")
                 self.btns_state[i] = self.my_gamepad.get_button(i)
 
     def check_hat(self):
@@ -161,14 +161,17 @@ class MyGamePad:
             for j in range(len(self.hats_state[i])): ## 0 = X ; 1 = Y
                 if(self.hats_state[i][j] is not new_hat_state[j]):
                     if(new_hat_state[j] == 0):
-                        print ("Hat was released on Hat_" + str(i)
-                           + " on axis: " + self.hatMap[j])
+                        #print ("Hat was released on Hat_" + str(i)
+                        #   + " on axis: " + self.hatMap[j])
+                        pass
                     elif(new_hat_state[j] == +1):
-                        print ("Hat was pushed on Hat_" + str(i)
-                           + " on axis: " + self.hatPos[new_hat_state[j]] + self.hatMap[j])
+                        #print ("Hat was pushed on Hat_" + str(i)
+                        #   + " on axis: " + self.hatPos[new_hat_state[j]] + self.hatMap[j])
+                        pass
                     elif(new_hat_state[j] == -1):
-                        print ("Hat was pushed on Hat_" + str(i)
-                           + " on axis: " + self.hatPos[new_hat_state[j]] + self.hatMap[j])
+                        #print ("Hat was pushed on Hat_" + str(i)
+                        #   + " on axis: " + self.hatPos[new_hat_state[j]] + self.hatMap[j])
+                        pass
                     self.hats_state[i] = new_hat_state
                     
     def main_loop(self):
@@ -189,7 +192,7 @@ class MyGamePad:
             axes = self.my_gamepad.get_numaxes()
             if(self.own_window):
                 self.textPrint.reset()
-                self.textPrint.my_print("Number of axes: {}".format(axes) )
+                #self.textPrint.my_print("Number of axes: {}".format(axes) )
                 self.textPrint.indent()
 
             for i in range(self.axes_num):
@@ -200,7 +203,7 @@ class MyGamePad:
             if(self.own_window):
                 for i in range( self.axes_num ):
                     axis = self.my_gamepad.get_axis( i )
-                    self.textPrint.my_print("Axis {} value: {:>6.3f}".format(i, axis) )
+                    #self.textPrint.my_print("Axis {} value: {:>6.3f}".format(i, axis) )
                 pygame.display.flip()
             
             self.my_clock.tick(10) # omezení na 5Hz
