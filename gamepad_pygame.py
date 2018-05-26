@@ -63,6 +63,7 @@ class MyZMQ:
     def connect_zmq(self):
         try:
             self.publisher.connect('tcp://127.0.0.1:'+str(self.zmqPort))
+            sleep(1)
             return True
         except:
             print("Failed to connect to ZMQ, path:")
