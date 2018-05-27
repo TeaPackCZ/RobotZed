@@ -1,34 +1,6 @@
 ﻿import pygame # For joystick - python-pygame
 import subprocess
 
-class TextPrint:
-    def __init__(self):
-        size = [500, 700]
-        self.screen = pygame.display.set_mode(size)
-        pygame.display.set_caption("Py Game Debug Window")
-        
-        self.BLACK  = (   0,   0,   0)
-        self.WHITE  = ( 255, 255, 255)
-        self.reset()
-        self.font = pygame.font.Font(None, 20)
-
-    def my_print(self, textString):
-        textBitmap = self.font.render(textString, True, self.WHITE)
-        self.screen.blit(textBitmap, [self.x, self.y])
-        self.y += self.line_height
-        
-    def reset(self):
-        self.screen.fill(self.BLACK)
-        self.x = 10
-        self.y = 10
-        self.line_height = 15
-        
-    def indent(self):
-        self.x += 10
-        
-    def unindent(self):
-        self.x -= 10
-
 import zmq
 from time import sleep
 
@@ -99,7 +71,7 @@ import signal   ## for Ctrl+C
 import sys      ## for logger
 
 class MyGamePad:
-    def __init__(self, own_window = False):
+    def __init__(self):
         pygame.init()
         pygame.joystick.init()
 
@@ -110,8 +82,8 @@ class MyGamePad:
         self.num_of_gamepads = pygame.joystick.get_count()
         
         self.enabled = True
-        self.own_window = own_window
 
+        
         self.enable_serial = False
         
         if(self.num_of_gamepads > 0):
@@ -137,11 +109,6 @@ class MyGamePad:
         self.axis_state = []
         for i in range(self.axes_num):
             self.axis_state.append(self.my_gamepad.get_axis(i))
-        
-        if(own_window):
-            self.textPrint = TextPrint()
-            self.textPrint.reset()
-
         self.hatMap = ["X","Y"]
         self.hatPos = [" ", "+", "-"]
         
@@ -205,21 +172,11 @@ class MyGamePad:
                     self.check_hat()
 
             axes = self.my_gamepad.get_numaxes()
-            if(self.own_window):
-                self.textPrint.reset()
-                #self.textPrint.my_print("Number of axes: {}".format(axes) )
-                self.textPrint.indent()
-
             for i in range(self.axes_num):
                 self.axis_state[i] = self.my_gamepad.get_axis(i)
 
             self.zMQ.send_diff_move(-self.axis_state[1], -self.axis_state[3])
 
-            if(self.own_window):
-                for i in range( self.axes_num ):
-                    axis = self.my_gamepad.get_axis( i )
-                    #self.textPrint.my_print("Axis {} value: {:>6.3f}".format(i, axis) )
-                pygame.display.flip()
             
             self.my_clock.tick(10) # omezení na 5Hz
 
