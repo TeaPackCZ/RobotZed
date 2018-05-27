@@ -1,6 +1,5 @@
 ﻿import pygame # For joystick - python-pygame
 import subprocess
-
 import zmq
 from time import sleep
 
@@ -18,10 +17,8 @@ class MyZMQ:
         def sigINT_Handler(signal, frame):
             print("\nYou pressed Ctrl+C")
             self.publisher.disconnect('tcp://127.0.0.1:'+str(self.zmqPort))
-            self.ser.close()
             self.enabled = False
-            self.mfile.flush()
-            self.mfile.close()
+            sleep(0.5)
             sys.exit(0)
 
         signal.signal(signal.SIGINT, sigINT_Handler)
@@ -53,14 +50,8 @@ class MyZMQ:
             print('tcp://127.0.0.1:'+str(self.zmqPort))
             return False
 
-    def send_diff_move(self, value1 = 0.00, value0 = 0.00):
-        message = ("$setM,D," + str(int(value0*100))
-                    + "," + str(round(value1,2)) + "\r\n")
-        if(not self.disconnected):
-            self.publisher.send_string(message)
-
     def send_string(self,data):
-        if(not disconnected):
+        if(not self.disconnected):
             self.publisher.send_string(data)
 
     def disconnect(self):
@@ -82,7 +73,6 @@ class MyGamePad:
         self.num_of_gamepads = pygame.joystick.get_count()
         
         self.enabled = True
-
         
         self.enable_serial = False
         
@@ -108,33 +98,23 @@ class MyGamePad:
 
         self.axis_state = []
         for i in range(self.axes_num):
-            self.axis_state.append(self.my_gamepad.get_axis(i))
-        self.hatMap = ["X","Y"]
-        self.hatPos = [" ", "+", "-"]
+            self.axis_state.append(round(self.my_gamepad.get_axis(i),2))
         
         self.main_loop()
+        
         self.zMQ.disconnect()
         self.deinit()
         
     def check_buttons_down(self):
         for i in range( self.btns_num):
             if(self.btns_state[i] is not self.my_gamepad.get_button(i)):
-                #print ("Button " + str(i) + " was pressed...")
-                if( i == 2 ): ## RED B button
-                    self.btn_1_pressed()
-                elif( i == 1): ## Green A button
-                    self.btn_A_pressed()
-                elif( i == 8): ## BACK button
-                    self.btn_back_pressed()
-                elif( i == 9): ## START button
-                    self.btn_start_pressed()
-                    
+                self.zMQ.send_string("gamePad,BTN," + str(i) + ",D,\r\n")
                 self.btns_state[i] = self.my_gamepad.get_button(i)
 
     def check_buttons_up(self):
         for i in range( self.btns_num):
             if(self.btns_state[i] is not self.my_gamepad.get_button(i)):
-                #print ("Button " + str(i) + " was released...")
+                self.zMQ.send_string("gamePad,BTN," + str(i) + ",U,\r\n")
                 self.btns_state[i] = self.my_gamepad.get_button(i)
 
     def check_hat(self):
@@ -142,19 +122,16 @@ class MyGamePad:
             new_hat_state = self.my_gamepad.get_hat(i)
             for j in range(len(self.hats_state[i])): ## 0 = X ; 1 = Y
                 if(self.hats_state[i][j] is not new_hat_state[j]):
-                    if(new_hat_state[j] == 0):
-                        #print ("Hat was released on Hat_" + str(i)
-                        #   + " on axis: " + self.hatMap[j])
-                        pass
-                    elif(new_hat_state[j] == +1):
-                        #print ("Hat was pushed on Hat_" + str(i)
-                        #   + " on axis: " + self.hatPos[new_hat_state[j]] + self.hatMap[j])
-                        pass
-                    elif(new_hat_state[j] == -1):
-                        #print ("Hat was pushed on Hat_" + str(i)
-                        #   + " on axis: " + self.hatPos[new_hat_state[j]] + self.hatMap[j])
-                        pass
+                    self.zMQ.send_string("gamePad,HAT,"+ str(i) + "," + str(j) + "," +str(new_hat_state[j]) + "\r\n")
                     self.hats_state[i] = new_hat_state
+                    
+    def check_axes(self):
+        # upadate values
+        for i in range(self.axes_num):
+            new_value = round(self.my_gamepad.get_axis(i),2)
+            if(self.axis_state[i] is not new_value):
+                self.zMQ.send_string("gamePad,AXS," + str(i) + "," + str(new_value) + "\r\n")
+                self.axis_state[i] = new_value
                     
     def main_loop(self):
         while self.enabled:
@@ -170,36 +147,13 @@ class MyGamePad:
 
                 if event.type == pygame.JOYHATMOTION:
                     self.check_hat()
-
-            axes = self.my_gamepad.get_numaxes()
-            for i in range(self.axes_num):
-                self.axis_state[i] = self.my_gamepad.get_axis(i)
-
-            self.zMQ.send_diff_move(-self.axis_state[1], -self.axis_state[3])
-
             
-            self.my_clock.tick(10) # omezení na 5Hz
+            self.check_axes();
+            
+            self.my_clock.tick(10) # omezení na cca 5 Hz
 
     def deinit(self):
-        pygame.quit ()
-
-    ## BUTTONS EVENTS - to be transmitted via ZMQ
-
-    def btn_1_pressed(self):
-        print ("Stop robot ... ")
-        self.zMQ.send_string("$setD,M,0,0\r\n")
-
-    def btn_A_pressed(self):
-        print ("Start ZMQ")
-        #subprocess.call("./zmq_init.sh")
-
-    def btn_back_pressed(self):
-        print ("EXIT ... ")
-        self.zMQ.send_string("$setD,T,0,0,\r\n")
-        self.enabled = False
-
-    def btn_start_pressed(self):
-        print ("Enable robot ... ")
-        self.zMQ.send_string("$setD,M,1,1\r\n")
+        pygame.quit()
+        
 
 logitechFX710 = MyGamePad()
