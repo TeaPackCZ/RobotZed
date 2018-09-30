@@ -104,6 +104,8 @@ class mbed:
         print("\nMbed detected SigINT signal")
         self.logger.save_line("Signal SigINT detected")
         self.enabled = False
+
+    def deinit(self):
         for port in self.InPorts:
             self.subscriber.disconnect('tcp://127.0.0.1:'+port)
             self.logger.save_line("SUB Disconnected from local port: " + port)
@@ -115,7 +117,6 @@ class mbed:
             self.serial.flush()
             self.serial.close()
             self.logger.save_line("Serial on " + self.mserial + " disconnected.")
-        sys.exit(0)
         
     def recvUpdate(self):
         waitingMSG = self.subscriber.poll(100,zmq.POLLIN)
@@ -140,13 +141,23 @@ class mbed:
         self.logger.save_line("mbed loop started...")
         print "Waitin for update..."
         self.toWrite = False
+        self.serial.write("$setD,C,1,1\r\n") #Soft restart of controller and motor drivers
         sleep(1)
+        self.serial.write("$setD,M,1,1\r\n") #Enable motors
+        sleep(0.5)
+        self.serial.write("$setM,D,-80,-80\r\n") # Start moving motors 
+                                                 # (for sickRD - reverse polarity)
         while(self.enabled):
             self.recvUpdate()
-            if(self.toWrite):
+            if(self.toWrite and self.enabled):
                 self.serial.write(self.magToWrite)
             sleep(0.1)
+        self.serial.write("setM,D,0,0\r\n") # set movement of motors to zero
+        sleep(0.1)
+        self.serial.write("$setD,M,0,0\r\n") # Disable motors movement
+        sleep(0.1)
+        self.serial.write("$setD,C,1,1\r\n") # Restart controller and motor drivers
+        self.deinit()
 
 M = mbed()
 M.run()
-
