@@ -129,7 +129,10 @@ class MyGamePad:
         # upadate values
         for i in range(self.axes_num):
             new_value = round(self.my_gamepad.get_axis(i),2)
-            if(self.axis_state[i] is not new_value):
+            if(self.axis_state[i] == new_value):
+                pass
+            else:
+                print self.axis_state[i], new_value
                 self.zMQ.send_string("gamePad,AXS," + str(i) + "," + str(new_value) + "\r\n")
                 self.axis_state[i] = new_value
                     
