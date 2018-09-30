@@ -10,7 +10,7 @@ A.addLocalPort("10110") # Main->GPSNav & GPS1 & GPS2
 A.addLocalPort("10201") # Mbed->Main
 A.addLocalPort("10210") # Main->Mbed
 
-A.addIP("192.168.0.1:9000") # RaspiCam?
+#A.addIP("192.168.0.1:9000") # RaspiCam?
 
 sleep(1)
 

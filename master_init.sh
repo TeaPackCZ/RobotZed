@@ -3,12 +3,12 @@
 python zmqLogger.py &
 
 python main.py &
-python gpsNavStarter.py &
+#python gpsNavStarter.py &
 
 python mbed.py /dev/ttyS2 115200 10201 mbed &
 
-python gpsReader.py /dev/ttyS3 115200 10101 GPS1 &
-python gpsReader.py /dev/ttyS4 115200 10102 GPS2 &
+#python gpsReader.py /dev/ttyS3 115200 10101 GPS1 &
+#python gpsReader.py /dev/ttyS4 115200 10102 GPS2 &
 
 python gamepad_pygame.py 10501 FX710 &
 
