@@ -47,7 +47,7 @@ class zMQLogger():
         zMQC = zmq.Context()
         self.subscriber = zMQC.socket(zmq.SUB)
         for port in self.ports:
-            self.subscriber.connect('tcp://127.0.0.1:'+port)
+            self.subscriber.bind('tcp://127.0.0.1:'+port)
             self.logger.save_line("Connected to port: " + port)
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
@@ -69,7 +69,7 @@ class zMQLogger():
                 self.logger.save_line("LocalPort " + newport + " is already binded...")
             else:
                 self.ports.append(newport)
-                self.subscriber.connect('tcp://127.0.0.1:'+newport)
+                self.subscriber.bind('tcp://127.0.0.1:'+newport)
                 self.logger.save_line("Connected to new local port: " + newport)
 
     def addIP(self, newIP):

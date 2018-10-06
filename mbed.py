@@ -9,7 +9,7 @@ class mbed:
     def __init__(self):
         self.logger = Logger("MbedLog")
 
-        self.InPorts = ["10210"]
+        self.InPorts = ["10501"]
         self.OutPorts = ["10201"]
 
         self.enabled = True
@@ -28,7 +28,7 @@ class mbed:
         self.publisher = zMQC.socket(zmq.PUB)
 
         for port in self.OutPorts:
-            self.publisher.bind('tcp://127.0.0.1:'+port)
+            self.publisher.connect('tcp://127.0.0.1:'+port)
             self.logger.save_line("Connected to port: " + port)
             sleep(0.5)
 

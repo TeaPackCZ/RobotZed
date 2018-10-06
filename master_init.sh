@@ -2,6 +2,8 @@
 
 python zmqLogger.py &
 
+sleep 1
+
 python main.py &
 #python gpsNavStarter.py &
 

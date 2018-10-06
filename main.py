@@ -8,7 +8,7 @@ class master:
     def __init__(self):
         self.logger = Logger("mainLog")
 
-        self.InPorts = ["10105","10201"]
+        self.InPorts = ["10105","10201","10501"]
         self.OutPortGPS = "10110"
         self.OutPortMBED = "10210"
 
@@ -24,11 +24,11 @@ class master:
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
         self.publisherGPS = zMQC.socket(zmq.PUB)
-        self.publisherGPS.bind('tcp://127.0.0.1:'+self.OutPortGPS)
+        self.publisherGPS.connect('tcp://127.0.0.1:'+self.OutPortGPS)
         self.logger.save_line("PublisherGPS connected to port: " + self.OutPortGPS)
 
         self.publisherMBED = zMQC.socket(zmq.PUB)
-        self.publisherMBED.bind('tcp://127.0.0.1:'+self.OutPortMBED)
+        self.publisherMBED.connect('tcp://127.0.0.1:'+self.OutPortMBED)
         self.logger.save_line("PublisherMBED connected to port: " + self.OutPortMBED)
         
         sleep(0.5)
@@ -69,6 +69,7 @@ class master:
         sleep(1)
         self.publisherGPS.send_string("ID:GPS1;RESTART:COLDSTART")
         self.publisherGPS.send_string("ID:GPS2;RESTART:COLDSTART")
+        sleep(1)
 
     def Game(self):
         waypoints = []
