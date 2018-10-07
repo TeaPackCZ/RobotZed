@@ -1,16 +1,17 @@
 import time
 import socket
 import struct
-HOST = '192.168.0.1'
-PORT = 2111
 
-STX = b'\x02'
-ETX = b'\x03'
+TIM_HOST = '192.168.0.1'
+TIM_PORT = 2111
+
+TIM_STX = b'\x02'
+TIM_ETX = b'\x03'
 
 class LaserIP:
     def __init__( self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((HOST, PORT))
+        self.socket.connect((TIM_HOST, TIM_PORT))
         self._buffer = b""
         self._timestamp = None
         self._scanData = None
@@ -21,20 +22,20 @@ class LaserIP:
     def receive( self ):
         data = self._buffer
         while True:
-            pos = data.find(ETX)
+            pos = data.find(TIM_ETX)
             if pos >= 0:
                 break
             data = self.socket.recv(1024)
             self._buffer += data
         
-        pos = self._buffer.find(ETX)
+        pos = self._buffer.find(TIM_ETX)
         assert( pos >= 0 )
         data = self._buffer[1:pos]
         self._buffer = self._buffer[pos+1:]
         return data
 
     def sendCmd( self, cmd ):
-        data = STX + cmd + ETX
+        data = TIM_STX + cmd + TIM_ETX
         self.socket.send(data)
         return self.receive()
 
