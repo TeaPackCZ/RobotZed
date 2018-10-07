@@ -2,6 +2,8 @@ import time
 import socket
 import struct
 
+import numpy as np
+
 TIM_HOST = '192.168.0.1'
 TIM_PORT = 2111
 
@@ -56,3 +58,17 @@ class LaserIP:
 
     def stopLaser( self ):
         self.sendCmd( b'sMN LMCstopmeas' )
+        
+class LaserDataAnalysis:
+    def __init__(self):
+        self.estop = np.load("TIM_estop.npy")
+        self.warning = np.load("TIM_warning.npy")
+        
+    def check_ROIs(self, data):
+        for i in range(len(data)-1):
+            if(data[i] < self.estop[i]):
+                return 2
+            elif(data[i] < self.warning[i]):
+                return 1
+        return 0
+        
