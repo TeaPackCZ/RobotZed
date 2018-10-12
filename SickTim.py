@@ -8,6 +8,8 @@ import signal
 from time import sleep
 from coord_lib import *
 
+import matplotlib.pyplot as plt
+
 TIM_HOST = '192.168.0.1'
 TIM_PORT = 2111
 
@@ -110,5 +112,43 @@ class LaserDataAnalysis:
                 
 
         self.deinit()
+
+    def testrun(self):
+        number_of_measurements = 1
+        laser = LaserIP()
         
+        drop = 10
+        
+        axis_x = np.arange(-135+drop,136,1/3.0,np.float)
+
+        for i in range(number_of_measurements):
+            [running, distance_raw] = laser.internalScan()
+            distance = distance_raw[3*drop::]
+
+            # Segmentation
+            segments = ang_segmentation(distance, max_diff = 100)
+
+            ## convert segments to cartezian:
+            new_x = []
+            new_y = []
+            for j in range(len(segments)):
+                [nx,ny] = ang2cartezian(axis_x[segments[j][0]:segments[j][0]+segments[j][1]],segments[j][2])
+                new_x.append(nx)
+                new_y.append(ny)
+
+            ## Show data:
+            plt.figure(2*i)
+            #Angular data:
+            for j in range(len(segments)):
+                plt.plot(axis_x[segments[j][0]:segments[j][0]+segments[j][1]],segments[j][2])
+            # Cartezian data:
+            plt.figure(2*i+1)
+            for j in range(len(segments)):
+                plt.plot(new_x[j],new_y[j])
+                plt.plot(0,0,'r*')
+            plt.show()
+
 A =LaserDataAnalysis()
+A.testrun()
+A.deinit()
+
