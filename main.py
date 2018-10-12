@@ -70,8 +70,8 @@ class master:
 
     def initRobot(self):
         sleep(1)
-        self.publisherGPS.send_string("ID:GPS1;RESTART:COLDSTART")
-        self.publisherGPS.send_string("ID:GPS2;RESTART:COLDSTART")
+        #self.publisherGPS.send_string("ID:GPS1;RESTART:COLDSTART")
+        #self.publisherGPS.send_string("ID:GPS2;RESTART:COLDSTART")
         sleep(1)
 
     def Game(self):
