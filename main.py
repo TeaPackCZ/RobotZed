@@ -150,7 +150,7 @@ class master:
         for waypoint in waypoints:
             self.SetWaypoint(waypoint)
             atWaypoint = False
-            while(not atWaypoint):
+            while(not atWaypoint and self.enabled):
                 self.checkAll()
                 sleep(0.1)
         #       updateAll
