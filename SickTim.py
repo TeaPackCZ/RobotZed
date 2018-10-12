@@ -3,6 +3,10 @@ import socket
 import struct
 
 import numpy as np
+import zmq
+import signal
+from time import sleep
+from coord_lib import *
 
 TIM_HOST = '192.168.0.1'
 TIM_PORT = 2111
@@ -63,7 +67,27 @@ class LaserDataAnalysis:
     def __init__(self):
         self.estop = np.load("TIM_estop.npy")
         self.warning = np.load("TIM_warning.npy")
-        
+        self.enabled = True
+
+        self.zMQport = "10301"
+        self.connected = False
+        signal.signal(signal.SIGINT, self.sigINT_Handler)
+        zMQC = zmq.Context()
+
+        self.publisher = zMQC.socket(zmq.PUB)
+        self.publisher.connect('tcp://127.0.0.1:'+self.zMQport)
+        sleep(0.5)
+
+        self.laser = LaserIP()
+
+    def sigINT_Handler(self,signal,frame):
+        print("\nLidar detected SigINT signal")
+        self.enabled = False
+
+    def deinit(self):
+        self.publisher.disconnect("tcp://127.0.0.1:"+self.zMQport)
+        del self.laser
+
     def check_ROIs(self, data):
         for i in range(len(data)-1):
             if(data[i] < self.estop[i]):
@@ -71,4 +95,20 @@ class LaserDataAnalysis:
             elif(data[i] < self.warning[i]):
                 return 1
         return 0
+
+    def run(self):
+        while(self.enabled):
+            [running, distance] = self.laser.internalScan()
+            ang_values = np.asarray(distance, np.int16)
+            
+            ROIs = self.check_ROIs(ang_values)
+            self.publisher.send_string("laser,ROI,all," + str(ROIs))
+
+            #if(self.trackObject):
+            segments = ang_segmentation(ang_values, max_diff = 100)
+            
+                
+
+        self.deinit()
         
+A =LaserDataAnalysis()

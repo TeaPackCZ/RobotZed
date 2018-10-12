@@ -10,7 +10,8 @@ A.addLocalPort("10110") # Main->GPSNav & GPS1 & GPS2
 A.addLocalPort("10201") # Mbed->Main
 A.addLocalPort("10210") # Main->Mbed
 
-A.addLocalPort("10501") # GamePad->Mbed - overdrive
+A.addLocalPort("10301") # Lidar->Main
+
 #A.addIP("192.168.0.1:9000") # RaspiCam?
 
 sleep(1)

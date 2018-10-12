@@ -8,7 +8,7 @@ class master:
     def __init__(self):
         self.logger = Logger("mainLog")
 
-        self.InPorts = ["10105","10201","10501"]
+        self.InPorts = ["10105","10201","10301","10501"]
         self.OutPortGPS = "10110"
         self.OutPortMBED = "10210"
 
@@ -32,6 +32,9 @@ class master:
         self.logger.save_line("PublisherMBED connected to port: " + self.OutPortMBED)
         
         sleep(0.5)
+        # LIDAR related
+        self.speedCoefs = [1.0, 0.5, 0.0]
+        self.lidarSpeedCoef = 0.0
         
     def sigINT_Handler(self, signal, frame):
         print("\nMaster detected SigINT signal")
