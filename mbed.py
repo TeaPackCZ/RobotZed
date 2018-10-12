@@ -9,7 +9,7 @@ class mbed:
     def __init__(self):
         self.logger = Logger("MbedLog")
 
-        self.InPorts = ["10501"]
+        self.InPorts = ["10210"]
         self.OutPorts = ["10201"]
 
         self.enabled = True
