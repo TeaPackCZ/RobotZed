@@ -66,6 +66,7 @@ class master:
         print("Waiting msgs: " +str(waitingMSG))
         while(waitingMSG > 0):
             msg = self.subscriber.recv_string()
+            self.logger.save_line("RECIVED: " + msg)
             self.parseMessage(msg)
             waitingMSG = self.subscriber.poll(100,zmq.POLLIN)
 
