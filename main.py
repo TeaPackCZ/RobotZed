@@ -71,7 +71,66 @@ class master:
             waitingMSG = self.subscriber.poll(100,zmq.POLLIN)
 
     def parseMessage(self,data):
+        [device,item,ID,state] = data.split(",")
+        if(device == "gamePad"):
+            if(item == "BTN"):
+                if( ID == 2 ): ## RED B button
+                    self.btn_B_pressed(state)
+                elif( ID == 1): ## Green A button
+                    self.btn_A_pressed(state)
+                elif( ID == 8): ## BACK button
+                    self.btn_back_pressed(state)
+                elif( ID == 9): ## START button
+                    self.btn_start_pressed(state)
+            if(item == "AXS"):
+                ids = ID.split(";")
+                values = state.split(";")
+                if(ids[0] == "0"):
+                    self.send_diff_move(values[0], values[1])
+        if(device == "laser"):
+            if(item == "ROI"):
+                self.lidarSpeedCoef = self.speedCoefs[state]
         return 0
+
+    def btn_B_pressed(self):
+        print ("Stop robot ... ")
+        self.publisherMBED.send_string("$setD,M,0,0\r\n")
+
+    def btn_A_pressed(self):
+        print ("Start autonomous program")
+        #subprocess.call("./zmq_init.sh")
+
+    def btn_back_pressed(self):
+        print ("Terminate program")
+        # Turn motors off
+        self.publisherMBED.send_string("$setD,M,0,0,\r\n")
+        # Turn controlled off
+        # HW restart pin not connected yet, ireversible.
+        self.publisherMBED.send_string("$setD,T,0,0,\r\n")
+        # Terminate all other modules of robot?
+        #self.global_publisher.send_string("ID:ALL,ACTION:Terminate,\r\n")
+        self.enabled = False
+
+    def btn_start_pressed(self):
+        print ("Enable robot ... ")
+        # Soft restart of controller
+        self.publisherMBED.send_string("$setD,C,1,1\r\n")
+        sleep(5)
+        # Enabling motors
+        self.publisherMBED.send_string("$setD,M,1,1\r\n")
+
+    def send_diff_move(self, value1 = 0.00, value0 = 0.00):
+        ## Implemented lidar safety coeficients
+        value_0 = int(value0*self.lidarSpeedCoef*100.0)
+        value_1 = int(value1*self.lidarSpeedCoef*100.0)
+        if(self.reverseRobot):
+            message = ("$setM,D," + str(value_0*(-1))
+                    + "," + str(value_1*(-1)) + "\r\n")
+        else:
+            message = ("$setM,D," + str(value_0)
+                    + "," + str(value_1) + "\r\n")
+        if(not self.disconnected):
+            self.publisherMBED.send_string(message)
 
     def initRobot(self):
         sleep(1)
