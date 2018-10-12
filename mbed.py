@@ -21,7 +21,7 @@ class mbed:
 
         for port in self.InPorts:
             self.subscriber.connect('tcp://127.0.0.1:'+port)
-            self.logger.save_line("Binded to port: " + port)
+            self.logger.save_line("Connected to port: " + port)
             sleep(0.5)
         self.subscriber.setsockopt(zmq.SUBSCRIBE, b"")
 
