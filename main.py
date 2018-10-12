@@ -12,6 +12,10 @@ class master:
         self.OutPortGPS = "10110"
         self.OutPortMBED = "10210"
 
+        # If reverseRobot is False, robot drives with display in front
+        # when True, robot drives with display on its tail.
+        self.reverseRobot = True
+
         self.enabled = True
         signal.signal(signal.SIGINT, self.sigINT_Handler)
         zMQC = zmq.Context()
