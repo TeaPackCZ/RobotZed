@@ -145,8 +145,8 @@ class mbed:
         sleep(1)
         self.serial.write("$setD,M,1,1\r\n") #Enable motors
         sleep(0.5)
-        self.serial.write("$setM,D,-80,-80\r\n") # Start moving motors 
-                                                 # (for sickRD - reverse polarity)
+#        self.serial.write("$setM,D,-80,-80\r\n") # Start moving motors 
+#                                                 # (for sickRD - reverse polarity)
         while(self.enabled):
             self.recvUpdate()
             if(self.toWrite and self.enabled):
