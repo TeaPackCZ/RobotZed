@@ -40,6 +40,8 @@ class master:
         print("\nMaster detected SigINT signal")
         self.logger.save_line("Signal SigINT detected")
         self.enabled = False
+        
+    def deinit(self):
         for port in self.InPorts:
             self.subscriber.disconnect('tcp://127.0.0.1:'+port)
             self.logger.save_line("SUB disconnected from local port: " + port)
@@ -49,8 +51,6 @@ class master:
 
         self.publisherMBED.disconnect('tcp://127.0.0.1:'+self.OutPortMBED)
         self.logger.save_line("PUB_MBED disconnected from local port: " + self.OutPortMBED)
-        
-        sys.exit(0)
 
     def SetWaypoint(self,data):
         self.publisherGPS.send_string(data)
@@ -93,6 +93,7 @@ class master:
         #   MarkWaypoint/Goal
         #Play4Winner
         #Switch to manual
+        self.deinit()
     
 M = master()
 M.Game()
