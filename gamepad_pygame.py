@@ -124,18 +124,25 @@ class MyGamePad:
                 if(self.hats_state[i][j] is not new_hat_state[j]):
                     self.zMQ.send_string("gamePad,HAT,"+ str(i) + "," + str(j) + "," +str(new_hat_state[j]) + "\r\n")
                     self.hats_state[i] = new_hat_state
-                    
+
     def check_axes(self):
-        # upadate values
-        for i in range(self.axes_num):
-            new_value = round(self.my_gamepad.get_axis(i),2)
-            if(self.axis_state[i] == new_value):
+        # update values
+        for i in range(0,self.axes_num,2):
+            new_value0 = round(self.my_gamepad.get_axis(i),2)
+            new_value1 = round(self.my_gamepad.get_axis(i+1),2)
+            if((self.axis_state[i] == new_value0) and
+               (self.axis_state[i+1] == new_value1)):
                 pass
             else:
-                print self.axis_state[i], new_value
-                self.zMQ.send_string("gamePad,AXS," + str(i) + "," + str(new_value) + "\r\n")
-                self.axis_state[i] = new_value
-                    
+                #print self.axis_state[i], new_value
+                message  = "gamePad,AXS,"
+                message += str(i) + ";" + str(i+1) + ","
+                message += str(round(new_value0,2)) + ";"
+                message += str(round(new_value1,2)) + ","
+                self.zMQ.send_string(message)
+                self.axis_state[i] = new_value0
+                self.axis_state[i+1] = new_value1
+
     def main_loop(self):
         while self.enabled:
             for event in pygame.event.get():
@@ -144,7 +151,7 @@ class MyGamePad:
 
                 if event.type == pygame.JOYBUTTONDOWN:
                     self.check_buttons_down()
-                
+
                 if event.type == pygame.JOYBUTTONUP:
                     self.check_buttons_up()
 
